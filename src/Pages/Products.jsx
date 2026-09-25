@@ -16,9 +16,13 @@ function Products({ products, setProducts, loading }) {
   const [editPrice, setEditPrice] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Product ke naam ke according image
+  // =========================================================
+  // PRODUCT IMAGE
+  // =========================================================
+
   function getProductImage(product) {
-    const productName = product.name?.toLowerCase() || "";
+    const productName =
+      product.name?.toLowerCase() || "";
 
     if (productName.includes("iphone 16")) {
       return iphone16Image;
@@ -31,9 +35,17 @@ function Products({ products, setProducts, loading }) {
     return product.image || product.thumbnail || "";
   }
 
-  // CSV Export
+  // =========================================================
+  // CSV EXPORT
+  // =========================================================
+
   function exportCSV() {
-    const headers = ["ID", "Name", "Price", "Stock"];
+    const headers = [
+      "ID",
+      "Name",
+      "Price",
+      "Stock",
+    ];
 
     const rows = products.map((product) => [
       product.id,
@@ -54,6 +66,7 @@ function Products({ products, setProducts, loading }) {
     const url = URL.createObjectURL(blob);
 
     const link = document.createElement("a");
+
     link.href = url;
     link.download = "products.csv";
 
@@ -66,17 +79,30 @@ function Products({ products, setProducts, loading }) {
     toast("📄 Products exported successfully!");
   }
 
-  // Add Product
+  // =========================================================
+  // ADD PRODUCT
+  // =========================================================
+
   function addProduct() {
-    if (name.trim() === "" || price === "" || stock === "") {
-      toast("⚠️ Please enter Product Name, Price and Stock");
+    if (
+      name.trim() === "" ||
+      price === "" ||
+      stock === ""
+    ) {
+      toast(
+        "⚠️ Please enter Product Name, Price and Stock"
+      );
       return;
     }
 
     const newProduct = {
       id:
         products.length > 0
-          ? Math.max(...products.map((p) => Number(p.id))) + 1
+          ? Math.max(
+              ...products.map((p) =>
+                Number(p.id)
+              )
+            ) + 1
           : 1,
 
       name: name.trim(),
@@ -86,7 +112,10 @@ function Products({ products, setProducts, loading }) {
       image: "",
     };
 
-    setProducts([...products, newProduct]);
+    setProducts([
+      ...products,
+      newProduct,
+    ]);
 
     setName("");
     setPrice("");
@@ -95,41 +124,71 @@ function Products({ products, setProducts, loading }) {
     toast("✅ Product Added Successfully!");
   }
 
-  // Search
-  let filteredProducts = products.filter((product) =>
-    product.name?.toLowerCase().includes(search.toLowerCase())
+  // =========================================================
+  // SEARCH
+  // =========================================================
+
+  let filteredProducts = products.filter(
+    (product) =>
+      product.name
+        ?.toLowerCase()
+        .includes(search.toLowerCase())
   );
 
-  // Sort
+  // =========================================================
+  // SORT
+  // =========================================================
+
   if (sortOrder === "lowToHigh") {
-    filteredProducts.sort((a, b) => a.price - b.price);
+    filteredProducts.sort(
+      (a, b) => a.price - b.price
+    );
   }
 
   if (sortOrder === "highToLow") {
-    filteredProducts.sort((a, b) => b.price - a.price);
+    filteredProducts.sort(
+      (a, b) => b.price - a.price
+    );
   }
 
-  // Pagination
+  // =========================================================
+  // PAGINATION
+  // =========================================================
+
   const productsPerPage = 5;
 
-  const indexOfLastProduct = currentPage * productsPerPage;
-  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  const indexOfLastProduct =
+    currentPage * productsPerPage;
 
-  const currentProducts = filteredProducts.slice(
-    indexOfFirstProduct,
-    indexOfLastProduct
-  );
+  const indexOfFirstProduct =
+    indexOfLastProduct - productsPerPage;
 
-  // Loading
+  const currentProducts =
+    filteredProducts.slice(
+      indexOfFirstProduct,
+      indexOfLastProduct
+    );
+
+  // =========================================================
+  // LOADING
+  // =========================================================
+
   if (loading) {
     return <h2>Loading Products...</h2>;
   }
+
+  // =========================================================
+  // UI
+  // =========================================================
 
   return (
     <div>
       <h1>Products Page</h1>
 
-      {/* Edit Product */}
+      {/* =====================================================
+          EDIT PRODUCT
+      ===================================================== */}
+
       {editId && (
         <div>
           <h3>Edit Product</h3>
@@ -138,20 +197,29 @@ function Products({ products, setProducts, loading }) {
             type="text"
             placeholder="Product Name"
             value={editName}
-            onChange={(e) => setEditName(e.target.value)}
+            onChange={(e) =>
+              setEditName(e.target.value)
+            }
           />
 
           <input
             type="number"
             placeholder="Price"
             value={editPrice}
-            onChange={(e) => setEditPrice(e.target.value)}
+            onChange={(e) =>
+              setEditPrice(e.target.value)
+            }
           />
 
           <button
             onClick={() => {
-              if (editName.trim() === "" || editPrice === "") {
-                toast("⚠️ Please enter Product Name and Price");
+              if (
+                editName.trim() === "" ||
+                editPrice === ""
+              ) {
+                toast(
+                  "⚠️ Please enter Product Name and Price"
+                );
                 return;
               }
 
@@ -171,7 +239,9 @@ function Products({ products, setProducts, loading }) {
               setEditName("");
               setEditPrice("");
 
-              toast("✏️ Product Updated Successfully!");
+              toast(
+                "✏️ Product Updated Successfully!"
+              );
             }}
           >
             Update
@@ -191,28 +261,39 @@ function Products({ products, setProducts, loading }) {
 
       <br />
 
-      {/* Add Product */}
+      {/* =====================================================
+          ADD PRODUCT
+      ===================================================== */}
+
       <input
         placeholder="Product Name"
         value={name}
-        onChange={(e) => setName(e.target.value)}
+        onChange={(e) =>
+          setName(e.target.value)
+        }
       />
 
       <input
         type="number"
         placeholder="Price"
         value={price}
-        onChange={(e) => setPrice(e.target.value)}
+        onChange={(e) =>
+          setPrice(e.target.value)
+        }
       />
 
       <input
         type="number"
         placeholder="Stock"
         value={stock}
-        onChange={(e) => setStock(e.target.value)}
+        onChange={(e) =>
+          setStock(e.target.value)
+        }
       />
 
-      <button onClick={addProduct}>Add Product</button>
+      <button onClick={addProduct}>
+        Add Product
+      </button>
 
       <button
         onClick={exportCSV}
@@ -224,7 +305,10 @@ function Products({ products, setProducts, loading }) {
       <br />
       <br />
 
-      {/* Search */}
+      {/* =====================================================
+          SEARCH
+      ===================================================== */}
+
       <input
         type="text"
         placeholder="Search Product"
@@ -235,13 +319,20 @@ function Products({ products, setProducts, loading }) {
         }}
       />
 
-      {/* Sort */}
+      {/* =====================================================
+          SORT
+      ===================================================== */}
+
       <select
         value={sortOrder}
-        onChange={(e) => setSortOrder(e.target.value)}
+        onChange={(e) =>
+          setSortOrder(e.target.value)
+        }
         style={{ marginLeft: "10px" }}
       >
-        <option value="">Sort By</option>
+        <option value="">
+          Sort By
+        </option>
 
         <option value="lowToHigh">
           Price: Low to High
@@ -255,8 +346,17 @@ function Products({ products, setProducts, loading }) {
       <br />
       <br />
 
-      {/* Products Table */}
-      <table border="1">
+      {/* =====================================================
+          PRODUCTS TABLE
+      ===================================================== */}
+
+      <table
+        border="1"
+        style={{
+          width: "100%",
+          borderCollapse: "collapse",
+        }}
+      >
         <thead>
           <tr>
             <th>ID</th>
@@ -269,128 +369,213 @@ function Products({ products, setProducts, loading }) {
         </thead>
 
         <tbody>
-          {currentProducts.map((product) => (
-            <tr key={product.id}>
-              <td>{product.id}</td>
+          {currentProducts.map(
+            (product) => (
+              <tr key={product.id}>
 
-              {/* Product Image */}
-              <td>
-                {getProductImage(product) ? (
-                  <img
-                    src={getProductImage(product)}
-                    alt={product.name}
-                    width="60"
-                    height="60"
+                {/* =================================================
+                    ID
+                ================================================= */}
+
+                <td>
+                  {product.id}
+                </td>
+
+                {/* =================================================
+                    PRODUCT IMAGE
+
+                    Increased from 60x60
+                    to 90x90
+                ================================================= */}
+
+                <td>
+                  {getProductImage(product) ? (
+                    <img
+                      src={getProductImage(product)}
+                      alt={product.name}
+                      width="90"
+                      height="90"
+                      style={{
+                        width: "90px",
+                        height: "90px",
+                        objectFit: "contain",
+                        display: "block",
+                        margin: "6px auto",
+                      }}
+                    />
+                  ) : (
+                    <span>
+                      No Image
+                    </span>
+                  )}
+                </td>
+
+                {/* =================================================
+                    PRODUCT NAME
+
+                    No blue color
+                    No underline
+                    Normal text appearance
+                ================================================= */}
+
+                <td>
+                  <Link
+                    to={`/product/${product.id}`}
                     style={{
-                      objectFit: "contain",
-                    }}
-                  />
-                ) : (
-                  <span>No Image</span>
-                )}
-              </td>
-
-              {/* Product Name */}
-              <td>
-                <Link to={`/product/${product.id}`}>
-                  {product.name}
-                </Link>
-              </td>
-
-              {/* Price */}
-              <td
-                onClick={() =>
-                  toast("💰 Product Price: ₹" + product.price)
-                }
-                style={{ cursor: "pointer" }}
-              >
-                ₹{product.price}
-              </td>
-
-              {/* Stock */}
-              <td
-                style={{
-                  color: product.stock <= 10 ? "red" : "green",
-                  fontWeight: "bold",
-                }}
-              >
-                {product.stock}
-
-                {product.stock <= 10 && (
-                  <div
-                    style={{
-                      color: "red",
-                      fontSize: "12px",
+                      color: "inherit",
+                      textDecoration: "none",
+                      fontWeight: "600",
+                      cursor: "pointer",
                     }}
                   >
-                    Low Stock
-                  </div>
-                )}
-              </td>
+                    {product.name}
+                  </Link>
+                </td>
 
-              {/* Actions */}
-              <td>
-                <button
-                  onClick={() => {
-                    setEditId(product.id);
-                    setEditName(product.name);
-                    setEditPrice(product.price);
+                {/* =================================================
+                    PRICE
+                ================================================= */}
+
+                <td
+                  onClick={() =>
+                    toast(
+                      "💰 Product Price: ₹" +
+                        product.price
+                    )
+                  }
+                  style={{
+                    cursor: "pointer",
                   }}
                 >
-                  Edit
-                </button>
+                  ₹{product.price}
+                </td>
 
-                <button
-                  onClick={() => {
-                    if (
-                      window.confirm(
-                        "Are you sure you want to delete this product?"
-                      )
-                    ) {
-                      setProducts(
-                        products.filter(
-                          (p) => p.id !== product.id
-                        )
+                {/* =================================================
+                    STOCK
+                ================================================= */}
+
+                <td
+                  style={{
+                    color:
+                      product.stock <= 10
+                        ? "red"
+                        : "green",
+                    fontWeight: "bold",
+                  }}
+                >
+                  {product.stock}
+
+                  {product.stock <= 10 && (
+                    <div
+                      style={{
+                        color: "red",
+                        fontSize: "12px",
+                      }}
+                    >
+                      Low Stock
+                    </div>
+                  )}
+                </td>
+
+                {/* =================================================
+                    ACTIONS
+                ================================================= */}
+
+                <td>
+                  <button
+                    onClick={() => {
+                      setEditId(product.id);
+                      setEditName(
+                        product.name
                       );
+                      setEditPrice(
+                        product.price
+                      );
+                    }}
+                  >
+                    Edit
+                  </button>
 
-                      toast("🗑️ Product Deleted Successfully!");
-                    }
-                  }}
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
-          ))}
+                  <button
+                    onClick={() => {
+                      if (
+                        window.confirm(
+                          "Are you sure you want to delete this product?"
+                        )
+                      ) {
+                        setProducts(
+                          products.filter(
+                            (p) =>
+                              p.id !==
+                              product.id
+                          )
+                        );
+
+                        toast(
+                          "🗑️ Product Deleted Successfully!"
+                        );
+                      }
+                    }}
+                  >
+                    Delete
+                  </button>
+                </td>
+
+              </tr>
+            )
+          )}
         </tbody>
       </table>
 
-      {/* No Products */}
+      {/* =====================================================
+          NO PRODUCTS
+      ===================================================== */}
+
       {currentProducts.length === 0 && (
-        <h3>No Products Found</h3>
+        <h3>
+          No Products Found
+        </h3>
       )}
 
-      {/* Pagination */}
-      <div style={{ marginTop: "20px" }}>
+      {/* =====================================================
+          PAGINATION
+      ===================================================== */}
+
+      <div
+        style={{
+          marginTop: "20px",
+        }}
+      >
         <button
           onClick={() =>
-            setCurrentPage(currentPage - 1)
+            setCurrentPage(
+              currentPage - 1
+            )
           }
-          disabled={currentPage === 1}
+          disabled={
+            currentPage === 1
+          }
         >
           Previous
         </button>
 
-        <span style={{ margin: "0 15px" }}>
+        <span
+          style={{
+            margin: "0 15px",
+          }}
+        >
           Page {currentPage}
         </span>
 
         <button
           onClick={() =>
-            setCurrentPage(currentPage + 1)
+            setCurrentPage(
+              currentPage + 1
+            )
           }
           disabled={
-            indexOfLastProduct >= filteredProducts.length
+            indexOfLastProduct >=
+            filteredProducts.length
           }
         >
           Next
@@ -400,4 +585,4 @@ function Products({ products, setProducts, loading }) {
   );
 }
 
-export default Products;  
+export default Products;

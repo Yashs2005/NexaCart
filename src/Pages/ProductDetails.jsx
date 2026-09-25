@@ -1,5 +1,26 @@
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { productsData } from "../data";
+
+// =========================================================
+// PRODUCT IMAGE
+// =========================================================
+
+function getProductImage(product) {
+  if (
+    product?.image &&
+    typeof product.image === "string" &&
+    product.image.trim() !== ""
+  ) {
+    return product.image;
+  }
+
+  return "";
+}
+
+// =========================================================
+// PRODUCT DETAILS
+// =========================================================
 
 function ProductDetails() {
   const { id } = useParams();
@@ -8,46 +29,201 @@ function ProductDetails() {
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
 
+  // =======================================================
+  // LOAD PRODUCT
+  // =======================================================
+
   useEffect(() => {
-    const savedProducts =
-      localStorage.getItem("products");
-
-    if (savedProducts) {
-      const products = JSON.parse(savedProducts);
-
-      const foundProduct = products.find(
-        (p) => p.id === Number(id)
+    try {
+      const foundProduct = productsData.find(
+        (item) => Number(item.id) === Number(id)
       );
 
-      setProduct(foundProduct);
+      setProduct(foundProduct || null);
+      setQuantity(1);
+    } catch (error) {
+      console.error("Product loading error:", error);
+      setProduct(null);
     }
   }, [id]);
 
+  // =======================================================
+  // PRODUCT NOT FOUND
+  // =======================================================
+
   if (!product) {
-    return <h2>Product not found</h2>;
+    return (
+      <div className="product-details-not-found">
+        <h2>Product not found</h2>
+
+        <Link to="/customer-view">
+          <button type="button">
+            ⬅ Back to Customer View
+          </button>
+        </Link>
+      </div>
+    );
   }
 
-  // Add to Cart
-  const handleAddToCart = () => {
-    const cart = [
-      {
-        ...product,
-        quantity,
-      },
-    ];
+  // =======================================================
+  // RATING
+  // =======================================================
 
-    localStorage.setItem(
-      "cart",
-      JSON.stringify(cart)
+  let rating = product.rating;
+
+  if (typeof rating === "object" && rating !== null) {
+    rating =
+      rating.rate ??
+      rating.value ??
+      rating.rating;
+  }
+
+  if (
+    rating === undefined ||
+    rating === null
+  ) {
+    rating =
+      product.rate ??
+      product.ratingValue ??
+      product.reviewRating;
+  }
+
+  rating =
+    rating !== undefined &&
+    rating !== null &&
+    !isNaN(Number(rating))
+      ? Number(rating)
+      : null;
+
+  // =======================================================
+  // RATING STARS
+  // =======================================================
+
+  function RatingStars({ rating }) {
+    if (!Number.isFinite(Number(rating))) {
+      return (
+        <span className="product-detail-no-rating">
+          No rating
+        </span>
+      );
+    }
+
+    const numeric = Number(rating);
+
+    return (
+      <div className="product-detail-rating-stars">
+        {[1, 2, 3, 4, 5].map((star) => {
+          // FULL STAR
+          if (numeric >= star) {
+            return (
+              <span
+                key={star}
+                className="product-detail-star full"
+              >
+                ★
+              </span>
+            );
+          }
+
+          // HALF STAR
+          if (numeric >= star - 0.5) {
+            return (
+              <span
+                key={star}
+                className="product-detail-star half"
+              >
+                <span className="product-detail-star-empty">
+                  ★
+                </span>
+
+                <span className="product-detail-star-filled">
+                  ★
+                </span>
+              </span>
+            );
+          }
+
+          // EMPTY STAR
+          return (
+            <span
+              key={star}
+              className="product-detail-star empty"
+            >
+              ★
+            </span>
+          );
+        })}
+      </div>
     );
+  }
 
-    alert("✅ Product added to Cart");
+  // =======================================================
+  // ADD TO CART
+  // =======================================================
 
-    navigate("/cart");
+  const handleAddToCart = () => {
+    try {
+      const savedCart = JSON.parse(
+        localStorage.getItem("cart") || "[]"
+      );
+
+      const cart = Array.isArray(savedCart)
+        ? savedCart
+        : [];
+
+      const existingProduct = cart.find(
+        (item) =>
+          Number(item.id) === Number(product.id)
+      );
+
+      let updatedCart;
+
+      if (existingProduct) {
+        updatedCart = cart.map((item) =>
+          Number(item.id) === Number(product.id)
+            ? {
+                ...item,
+                quantity:
+                  Number(item.quantity || 1) +
+                  quantity,
+              }
+            : item
+        );
+      } else {
+        updatedCart = [
+          ...cart,
+          {
+            ...product,
+            quantity,
+          },
+        ];
+      }
+
+      localStorage.setItem(
+        "cart",
+        JSON.stringify(updatedCart)
+      );
+
+      alert("✅ Product added to Cart");
+
+      navigate("/cart");
+    } catch (error) {
+      console.error(
+        "Cart update failed:",
+        error
+      );
+    }
   };
 
-  // Buy Now
+  // =======================================================
+  // BUY NOW
+  // =======================================================
+
   const handleBuyNow = () => {
+    if (stock <= 0) {
+      return;
+    }
+
     const buyNowCart = [
       {
         ...product,
@@ -67,103 +243,130 @@ function ProductDetails() {
     });
   };
 
-  return (
-    <div
-      style={{
-        display: "flex",
-        gap: "40px",
-        padding: "30px",
-        alignItems: "flex-start",
-        background: "#f3f3f3",
-        minHeight: "100vh",
-      }}
-    >
-      {/* LEFT SIDE IMAGE */}
+  // =======================================================
+  // SAFE VALUES
+  // =======================================================
 
-      <div
-        style={{
-          background: "white",
-          padding: "20px",
-          borderRadius: "10px",
-        }}
-      >
-        <img
-          src={product.image}
-          alt={product.name}
-          style={{
-            width: "400px",
-            height: "400px",
-            objectFit: "contain",
-          }}
-        />
+  const price = Number(product.price || 0);
+
+  const stock = Number(product.stock || 0);
+
+  const image = getProductImage(product);
+
+  // =======================================================
+  // UI
+  // =======================================================
+
+  return (
+    <div className="product-details-page">
+
+      {/* ===================================================
+          LEFT IMAGE
+      =================================================== */}
+
+      <div className="product-details-image-card">
+
+        <div className="product-details-image-wrap">
+
+          {image ? (
+            <img
+              src={image}
+              alt={product.name}
+              className="product-details-image"
+              onError={(event) => {
+                event.currentTarget.style.display =
+                  "none";
+
+                event.currentTarget.parentElement?.classList.add(
+                  "image-error"
+                );
+              }}
+            />
+          ) : (
+            <div className="product-details-no-image">
+              <span className="product-details-no-image-icon">
+                🛍️
+              </span>
+
+              <strong>
+                {product.name}
+              </strong>
+
+              <small>
+                Image not available
+              </small>
+            </div>
+          )}
+
+        </div>
+
       </div>
 
-      {/* RIGHT SIDE DETAILS */}
+      {/* ===================================================
+          RIGHT DETAILS
+      =================================================== */}
 
-      <div
-        style={{
-          flex: 1,
-          background: "white",
-          padding: "25px",
-          borderRadius: "10px",
-        }}
-      >
-        <h1>{product.name}</h1>
+      <div className="product-details-info">
 
-        <p
-          style={{
-            color: "#e47911",
-            fontSize: "18px",
-          }}
-        >
-          ⭐⭐⭐⭐⭐ 4.5 (2,340 ratings)
-        </p>
+        {/* PRODUCT NAME */}
+
+        <h1 className="product-details-title">
+          {product.name}
+        </h1>
+
+        {/* RATING */}
+
+        <div className="product-details-rating-row">
+
+          {rating !== null ? (
+            <>
+              <RatingStars
+                rating={rating}
+              />
+
+              <span className="product-details-rating-number">
+                {rating.toFixed(1)}
+              </span>
+            </>
+          ) : (
+            <span className="product-detail-no-rating">
+              No rating
+            </span>
+          )}
+
+        </div>
 
         <hr />
 
         {/* PRICE */}
 
-        <h2
-          style={{
-            color: "#B12704",
-            fontSize: "30px",
-            marginBottom: "5px",
-          }}
-        >
-          ₹{product.price.toLocaleString()}
+        <h2 className="product-details-price">
+          ₹{price.toLocaleString("en-IN")}
         </h2>
 
         {/* UNIT */}
 
-        <p
-          style={{
-            fontSize: "17px",
-            color: "#555",
-            fontWeight: "bold",
-            marginTop: "5px",
-          }}
-        >
+        <p className="product-details-unit">
           📦 Price: ₹
-          {product.price.toLocaleString()} /{" "}
+          {price.toLocaleString("en-IN")} /{" "}
           {product.unit || "1 Piece"}
         </p>
 
-        <p>Inclusive of all taxes</p>
+        <p className="product-details-tax">
+          Inclusive of all taxes
+        </p>
 
         {/* STOCK */}
 
         <p
-          style={{
-            color:
-              product.stock > 0
-                ? "green"
-                : "red",
-            fontWeight: "bold",
-            fontSize: "18px",
-          }}
+          className={
+            stock > 0
+              ? "product-details-stock in-stock"
+              : "product-details-stock out-stock"
+          }
         >
-          {product.stock > 0
-            ? `✅ In Stock (${product.stock} available)`
+          {stock > 0
+            ? `✅ In Stock (${stock} available)`
             : "❌ Out of Stock"}
         </p>
 
@@ -171,133 +374,92 @@ function ProductDetails() {
 
         {/* QUANTITY */}
 
-        <h3>Quantity</h3>
+        <h3 className="product-details-quantity-title">
+          Quantity
+        </h3>
 
-        <div
-          style={{
-            marginBottom: "20px",
-            display: "flex",
-            alignItems: "center",
-          }}
-        >
+        <div className="product-details-quantity">
+
           <button
-            onClick={() =>
-              quantity > 1 &&
-              setQuantity(quantity - 1)
-            }
-            style={{
-              padding: "8px 15px",
-              cursor: "pointer",
-              fontSize: "18px",
+            type="button"
+            onClick={() => {
+              if (quantity > 1) {
+                setQuantity(quantity - 1);
+              }
             }}
+            disabled={quantity <= 1}
           >
             ➖
           </button>
 
-          <span
-            style={{
-              margin: "0 20px",
-              fontSize: "20px",
-              fontWeight: "bold",
-            }}
-          >
+          <span>
             {quantity}
           </span>
 
           <button
-            onClick={() =>
-              quantity < product.stock &&
-              setQuantity(quantity + 1)
-            }
-            style={{
-              padding: "8px 15px",
-              cursor: "pointer",
-              fontSize: "18px",
+            type="button"
+            onClick={() => {
+              if (quantity < stock) {
+                setQuantity(quantity + 1);
+              }
             }}
+            disabled={
+              stock <= 0 ||
+              quantity >= stock
+            }
           >
             ➕
           </button>
+
         </div>
 
         {/* TOTAL */}
 
-        <h2>
+        <h2 className="product-details-total">
           Total: ₹
-          {(product.price * quantity).toLocaleString()}
+          {(price * quantity).toLocaleString(
+            "en-IN"
+          )}
         </h2>
 
-        <p
-          style={{
-            color: "#555",
-          }}
-        >
-          {quantity} × {product.unit || "1 Piece"}
+        <p className="product-details-total-unit">
+          {quantity} ×{" "}
+          {product.unit || "1 Piece"}
         </p>
 
-        {/* ADD TO CART */}
+        {/* ACTION BUTTONS */}
 
-        <button
-          onClick={handleAddToCart}
-          disabled={product.stock <= 0}
-          style={{
-            background:
-              product.stock > 0
-                ? "#FFD814"
-                : "#ccc",
-            border: "none",
-            padding: "14px 30px",
-            borderRadius: "30px",
-            cursor:
-              product.stock > 0
-                ? "pointer"
-                : "not-allowed",
-            marginRight: "15px",
-            fontWeight: "bold",
-            fontSize: "16px",
-          }}
-        >
-          🛒 Add to Cart
-        </button>
+        <div className="product-details-actions">
 
-        {/* BUY NOW */}
-
-        <button
-          onClick={handleBuyNow}
-          disabled={product.stock <= 0}
-          style={{
-            background:
-              product.stock > 0
-                ? "#FFA41C"
-                : "#ccc",
-            border: "none",
-            padding: "14px 30px",
-            borderRadius: "30px",
-            cursor:
-              product.stock > 0
-                ? "pointer"
-                : "not-allowed",
-            fontWeight: "bold",
-            fontSize: "16px",
-          }}
-        >
-          ⚡ Buy Now
-        </button>
-
-        <br />
-        <br />
-
-        {/* BACK BUTTON */}
-
-        <Link to="/customer-view">
           <button
-            style={{
-              padding: "10px 20px",
-              cursor: "pointer",
-            }}
+            type="button"
+            className="product-details-cart-btn"
+            onClick={handleAddToCart}
+            disabled={stock <= 0}
           >
-            ⬅ Back to Customer View
+            🛒 Add to Cart
           </button>
+
+          <button
+            type="button"
+            className="product-details-buy-btn"
+            onClick={handleBuyNow}
+            disabled={stock <= 0}
+          >
+            ⚡ Buy Now
+          </button>
+
+        </div>
+
+        {/* BACK */}
+
+        <Link
+          to="/customer-view"
+          className="product-details-back-link"
+        >
+          ⬅ Back to Customer View
         </Link>
+
       </div>
     </div>
   );

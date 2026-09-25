@@ -11,13 +11,127 @@ function Cart() {
     setCart(savedCart);
   }, []);
 
+  // =========================
+  // RATING STARS
+  // =========================
+
+  function RatingStars({ rating }) {
+    const stars = [];
+
+    for (let i = 1; i <= 5; i++) {
+      // FULL STAR
+      if (rating >= i) {
+        stars.push(
+          <span
+            key={i}
+            style={{
+              color: "#f5b301",
+              fontSize: "20px",
+              lineHeight: "20px",
+              display: "inline-block",
+              width: "20px",
+              height: "20px",
+            }}
+          >
+            ★
+          </span>
+        );
+      }
+
+      // HALF STAR
+      else if (rating >= i - 0.5) {
+        stars.push(
+          <span
+            key={i}
+            style={{
+              position: "relative",
+              display: "inline-block",
+              width: "20px",
+              height: "20px",
+              fontSize: "20px",
+              lineHeight: "20px",
+            }}
+          >
+            {/* GREY STAR */}
+            <span
+              style={{
+                position: "absolute",
+                left: 0,
+                top: 0,
+                color: "#777777",
+                width: "20px",
+                height: "20px",
+              }}
+            >
+              ★
+            </span>
+
+            {/* YELLOW HALF */}
+            <span
+              style={{
+                position: "absolute",
+                left: 0,
+                top: 0,
+                color: "#f5b301",
+                width: "10px",
+                height: "20px",
+                overflow: "hidden",
+              }}
+            >
+              ★
+            </span>
+          </span>
+        );
+      }
+
+      // EMPTY STAR
+      else {
+        stars.push(
+          <span
+            key={i}
+            style={{
+              color: "#777777",
+              fontSize: "20px",
+              lineHeight: "20px",
+              display: "inline-block",
+              width: "20px",
+              height: "20px",
+            }}
+          >
+            ★
+          </span>
+        );
+      }
+    }
+
+    return (
+      <span
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "2px",
+          height: "22px",
+        }}
+      >
+        {stars}
+      </span>
+    );
+  }
+
+  // =========================
+  // UPDATE QUANTITY
+  // =========================
+
   const updateQuantity = (id, type) => {
     const updatedCart = cart.map((item) => {
       if (item.id === id) {
         const qty =
           type === "plus"
             ? item.quantity + 1
-            : Math.max(1, item.quantity - 1);
+            : Math.max(
+                1,
+                item.quantity - 1
+              );
 
         return {
           ...item,
@@ -36,6 +150,10 @@ function Cart() {
     );
   };
 
+  // =========================
+  // REMOVE PRODUCT
+  // =========================
+
   const removeProduct = (id) => {
     const updatedCart = cart.filter(
       (item) => item.id !== id
@@ -48,6 +166,10 @@ function Cart() {
       JSON.stringify(updatedCart)
     );
   };
+
+  // =========================
+  // GRAND TOTAL
+  // =========================
 
   const total = cart.reduce(
     (sum, item) =>
@@ -124,6 +246,57 @@ function Cart() {
               <div style={{ flex: 1 }}>
                 <h2>{item.name}</h2>
 
+                {/* =========================
+                    PRODUCT RATING
+                ========================= */}
+
+                <div
+                  className="cart-rating"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    margin: "8px 0 12px",
+                    minHeight: "24px",
+                  }}
+                >
+                  {item.rating !== null &&
+                  item.rating !== undefined &&
+                  !isNaN(Number(item.rating)) ? (
+                    <>
+                      <RatingStars
+                        rating={Number(
+                          item.rating
+                        )}
+                      />
+
+                      <span
+                        className="cart-rating-number"
+                        style={{
+                          fontSize: "15px",
+                          fontWeight: "600",
+                        }}
+                      >
+                        {Number(
+                          item.rating
+                        ).toFixed(1)}
+                      </span>
+                    </>
+                  ) : (
+                    <span
+                      className="cart-no-rating"
+                      style={{
+                        fontSize: "14px",
+                        fontWeight: "500",
+                      }}
+                    >
+                      No rating
+                    </span>
+                  )}
+                </div>
+
+                {/* PRICE */}
+
                 <p
                   style={{
                     fontSize: "18px",
@@ -133,6 +306,8 @@ function Cart() {
                 >
                   ₹{item.price.toLocaleString()}
                 </p>
+
+                {/* UNIT */}
 
                 <p
                   style={{
