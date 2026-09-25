@@ -1,5 +1,5 @@
 import iphone16 from "./assets/iphone16.jpg";
-import samsungs25 from "./assets/samsungs25.webp";
+import samsungs25 from "./assets/Samsungs25.webp";
 
 // =====================================================
 // NEXACART - FINAL CUSTOMER VIEW DATA
