@@ -4159,9 +4159,6 @@ body.dark-mode .customer-view-page .no-rating,
 .dark-mode .customer-view-page .no-rating {
   color: #cbd5e1 !important;
 }
-    padding: 18px;
-  }
-
   .product-details-title {
     font-size: 25px;
   }
@@ -4178,7 +4175,7 @@ body.dark-mode .customer-view-page .no-rating,
   .product-details-buy-btn {
     width: 100%;
   }
-}
+  
 /* =========================================================
    PRODUCT IMAGE PLACEHOLDER
    ========================================================= */
