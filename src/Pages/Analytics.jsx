@@ -20,10 +20,29 @@ function Analytics() {
   const [orders, setOrders] = useState([]);
 
   useEffect(() => {
-    const savedOrders =
-      JSON.parse(localStorage.getItem("orders")) || [];
+    const loadOrders = () => {
+      try {
+        const savedOrders =
+          JSON.parse(localStorage.getItem("orders")) || [];
 
-    setOrders(savedOrders);
+        setOrders(
+          Array.isArray(savedOrders)
+            ? savedOrders
+            : []
+        );
+      } catch (error) {
+        console.error("Orders load failed:", error);
+        setOrders([]);
+      }
+    };
+
+    loadOrders();
+
+    window.addEventListener("storage", loadOrders);
+
+    return () => {
+      window.removeEventListener("storage", loadOrders);
+    };
   }, []);
 
   const months = [
@@ -41,12 +60,51 @@ function Analytics() {
     "December",
   ];
 
+  // =========================================================
+  // OLD DEMO PRODUCTS
+  // =========================================================
+
+  const OLD_DEMO_PRODUCTS = [
+    "Essence Mascara Lash Princess",
+    "Eyeshadow Palette with Mirror",
+    "Gucci Bloom Eau de",
+    "Red Lipstick",
+  ];
+
+  const normalizeProductName = (name) =>
+    String(name || "")
+      .trim()
+      .toLowerCase();
+
+  // =========================================================
+  // VALID ORDERS
+  //
+  // Old demo products are removed.
+  // Glass Cleaner is NOT removed.
+  // Any newly purchased product will automatically remain.
+  // =========================================================
+
+  const validOrders = orders.filter((order) => {
+    const productName = normalizeProductName(
+      order.product
+    );
+
+    if (!productName) {
+      return false;
+    }
+
+    return !OLD_DEMO_PRODUCTS.some(
+      (oldProduct) =>
+        normalizeProductName(oldProduct) === productName
+    );
+  });
+
   // -----------------------------
   // Monthly Sales Data
   // -----------------------------
 
   const sales = months.map((month, index) => {
-    const monthOrders = orders.filter((order) => {
+    const monthOrders = validOrders.filter((order) => {
       if (!order.orderDate) return false;
 
       const date = new Date(order.orderDate);
@@ -55,7 +113,8 @@ function Analytics() {
     });
 
     const revenue = monthOrders.reduce(
-      (sum, order) => sum + Number(order.amount || 0),
+      (sum, order) =>
+        sum + Number(order.amount || 0),
       0
     );
 
@@ -72,8 +131,8 @@ function Analytics() {
 
   const filteredOrders =
     selectedMonth === "All"
-      ? orders
-      : orders.filter((order) => {
+      ? validOrders
+      : validOrders.filter((order) => {
           if (!order.orderDate) return false;
 
           const date = new Date(order.orderDate);
@@ -89,7 +148,8 @@ function Analytics() {
   // -----------------------------
 
   const totalSales = filteredOrders.reduce(
-    (sum, order) => sum + Number(order.amount || 0),
+    (sum, order) =>
+      sum + Number(order.amount || 0),
     0
   );
 
@@ -115,8 +175,16 @@ function Analytics() {
   const productCounts = {};
 
   filteredOrders.forEach((order) => {
-    productCounts[order.product] =
-      (productCounts[order.product] || 0) + 1;
+    const productName = String(
+      order.product || ""
+    ).trim();
+
+    if (!productName) {
+      return;
+    }
+
+    productCounts[productName] =
+      (productCounts[productName] || 0) + 1;
   });
 
   // -----------------------------
@@ -150,7 +218,7 @@ function Analytics() {
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
 
-  const currentMonthRevenue = orders
+  const currentMonthRevenue = validOrders
     .filter((order) => {
       if (!order.orderDate) return false;
 
@@ -175,7 +243,8 @@ function Analytics() {
     selectedMonth === "All"
       ? sales
       : sales.filter(
-          (item) => item.month === selectedMonth
+          (item) =>
+            item.month === selectedMonth
         );
 
   // -----------------------------
@@ -221,7 +290,7 @@ function Analytics() {
 
     link.download =
       selectedMonth === "All"
-        ? "Shopify-Sales-Report.csv"
+        ? "NexaCart-Sales-Report.csv"
         : `${selectedMonth}-Sales-Report.csv`;
 
     document.body.appendChild(link);
@@ -329,7 +398,7 @@ function Analytics() {
 
       {/* No Orders Message */}
 
-      {orders.length === 0 && (
+      {validOrders.length === 0 && (
         <div
           style={{
             background: "#fff3cd",
@@ -464,7 +533,7 @@ function Analytics() {
                 {productData.map(
                   (entry, index) => (
                     <Cell
-                      key={index}
+                      key={`${entry.name}-${index}`}
                       fill={
                         COLORS[
                           index % COLORS.length
@@ -547,7 +616,9 @@ function Analytics() {
         </tbody>
       </table>
 
-      {/* Order Details */}
+      {/* =====================================================
+          RECENT SALES
+          ===================================================== */}
 
       {filteredOrders.length > 0 && (
         <div style={{ marginTop: "40px" }}>

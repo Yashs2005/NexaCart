@@ -4159,6 +4159,9 @@ body.dark-mode .customer-view-page .no-rating,
 .dark-mode .customer-view-page .no-rating {
   color: #cbd5e1 !important;
 }
+    padding: 18px;
+  }
+
   .product-details-title {
     font-size: 25px;
   }
@@ -4175,7 +4178,7 @@ body.dark-mode .customer-view-page .no-rating,
   .product-details-buy-btn {
     width: 100%;
   }
-  
+}
 /* =========================================================
    PRODUCT IMAGE PLACEHOLDER
    ========================================================= */
@@ -8275,3 +8278,246 @@ body.dark-mode .dashboard-section table td a:hover {
 
 /* Avoid changing the status colors already used by the dashboard. */
 
+
+/* =========================================================
+   NEXACART - FINAL DASHBOARD + ANALYTICS DARK MODE FIX
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   1. DASHBOARD PRODUCT NAMES
+   Normal text only: no blue color and no underline.
+   --------------------------------------------------------- */
+.content .dashboard-section table td a,
+.dashboard-section table td a,
+.dashboard-section table td a:visited,
+.dashboard-section table td a:hover,
+.dashboard-section table td a:focus,
+.dashboard-section table td a:active {
+  color: #222222 !important;
+  -webkit-text-fill-color: #222222 !important;
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+  box-shadow: none !important;
+  font-weight: 500 !important;
+}
+
+/* ---------------------------------------------------------
+   2. DASHBOARD PRODUCT IMAGES
+   Make the product images visibly larger.
+   --------------------------------------------------------- */
+.dashboard-section table td img,
+.dashboard-section table td a img,
+.content .dashboard-section table td img {
+  width: 110px !important;
+  height: 110px !important;
+  max-width: 110px !important;
+  max-height: 110px !important;
+  min-width: 110px !important;
+  min-height: 110px !important;
+  object-fit: contain !important;
+  display: block !important;
+  margin: 0 auto !important;
+}
+
+.dashboard-section table td,
+.dashboard-section table th {
+  vertical-align: middle !important;
+}
+
+/* ---------------------------------------------------------
+   3. DASHBOARD PRODUCT NAMES - DARK MODE
+   Still normal white text, never blue, never underlined.
+   --------------------------------------------------------- */
+.dark .content .dashboard-section table td a,
+.dark .dashboard-section table td a,
+.dark .dashboard-section table td a:visited,
+.dark .dashboard-section table td a:hover,
+.dark .dashboard-section table td a:focus,
+.dark .dashboard-section table td a:active,
+body.dark-mode .content .dashboard-section table td a,
+body.dark-mode .dashboard-section table td a,
+body.dark-mode .dashboard-section table td a:visited,
+body.dark-mode .dashboard-section table td a:hover,
+body.dark-mode .dashboard-section table td a:focus,
+body.dark-mode .dashboard-section table td a:active {
+  color: #f8fafc !important;
+  -webkit-text-fill-color: #f8fafc !important;
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+  box-shadow: none !important;
+  font-weight: 500 !important;
+}
+
+/* =========================================================
+   4. RECHARTS AXIS TEXT - DARK MODE
+   Fixes month labels and amount/value labels disappearing.
+   Applies to Dashboard and Analytics chart sections.
+   ========================================================= */
+.dark .dashboard-section .recharts-cartesian-axis-tick-value,
+.dark .dashboard-section .recharts-cartesian-axis-tick text,
+.dark .dashboard-section .recharts-xAxis text,
+.dark .dashboard-section .recharts-yAxis text,
+.dark .dashboard-section .recharts-text,
+.dark .dashboard-section .recharts-label,
+.dark .dashboard-section .recharts-legend-item-text,
+body.dark-mode .dashboard-section .recharts-cartesian-axis-tick-value,
+body.dark-mode .dashboard-section .recharts-cartesian-axis-tick text,
+body.dark-mode .dashboard-section .recharts-xAxis text,
+body.dark-mode .dashboard-section .recharts-yAxis text,
+body.dark-mode .dashboard-section .recharts-text,
+body.dark-mode .dashboard-section .recharts-label,
+body.dark-mode .dashboard-section .recharts-legend-item-text,
+.dark .page .recharts-cartesian-axis-tick-value,
+.dark .page .recharts-cartesian-axis-tick text,
+.dark .page .recharts-xAxis text,
+.dark .page .recharts-yAxis text,
+.dark .page .recharts-text,
+.dark .page .recharts-label,
+.dark .page .recharts-legend-item-text,
+body.dark-mode .page .recharts-cartesian-axis-tick-value,
+body.dark-mode .page .recharts-cartesian-axis-tick text,
+body.dark-mode .page .recharts-xAxis text,
+body.dark-mode .page .recharts-yAxis text,
+body.dark-mode .page .recharts-text,
+body.dark-mode .page .recharts-label,
+body.dark-mode .page .recharts-legend-item-text {
+  fill: #ffffff !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Catch SVG text when the chart is inside another analytics wrapper. */
+.dark .dashboard-section .recharts-wrapper svg text,
+body.dark-mode .dashboard-section .recharts-wrapper svg text,
+.dark .page .recharts-wrapper svg text,
+body.dark-mode .page .recharts-wrapper svg text {
+  fill: #ffffff !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Keep chart grid visible without overpowering the labels. */
+.dark .dashboard-section .recharts-cartesian-grid line,
+body.dark-mode .dashboard-section .recharts-cartesian-grid line,
+.dark .page .recharts-cartesian-grid line,
+body.dark-mode .page .recharts-cartesian-grid line {
+  stroke: #475569 !important;
+  opacity: 1 !important;
+}
+
+/* =========================================================
+   5. RECHARTS TOOLTIP - DARK MODE
+   Fixes the white tooltip box showing without month/amount text.
+   ========================================================= */
+.dark .dashboard-section .recharts-tooltip-wrapper,
+body.dark-mode .dashboard-section .recharts-tooltip-wrapper,
+.dark .page .recharts-tooltip-wrapper,
+body.dark-mode .page .recharts-tooltip-wrapper {
+  z-index: 99999 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.dark .dashboard-section .recharts-default-tooltip,
+body.dark-mode .dashboard-section .recharts-default-tooltip,
+.dark .page .recharts-default-tooltip,
+body.dark-mode .page .recharts-default-tooltip {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 7px !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  box-shadow: 0 6px 18px rgba(0,0,0,.35) !important;
+}
+
+.dark .dashboard-section .recharts-default-tooltip *,
+body.dark-mode .dashboard-section .recharts-default-tooltip *,
+.dark .page .recharts-default-tooltip *,
+body.dark-mode .page .recharts-default-tooltip * {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  fill: #111827 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.dark .dashboard-section .recharts-default-tooltip .recharts-tooltip-label,
+.dark .dashboard-section .recharts-default-tooltip .recharts-tooltip-item,
+.dark .dashboard-section .recharts-default-tooltip .recharts-tooltip-item-list,
+.dark .dashboard-section .recharts-default-tooltip .recharts-tooltip-item-name,
+.dark .dashboard-section .recharts-default-tooltip .recharts-tooltip-item-value,
+.dark .dashboard-section .recharts-default-tooltip .recharts-tooltip-item-unit,
+.dark .dashboard-section .recharts-default-tooltip .recharts-tooltip-item-separator,
+body.dark-mode .dashboard-section .recharts-default-tooltip .recharts-tooltip-label,
+body.dark-mode .dashboard-section .recharts-default-tooltip .recharts-tooltip-item,
+body.dark-mode .dashboard-section .recharts-default-tooltip .recharts-tooltip-item-list,
+body.dark-mode .dashboard-section .recharts-default-tooltip .recharts-tooltip-item-name,
+body.dark-mode .dashboard-section .recharts-default-tooltip .recharts-tooltip-item-value,
+body.dark-mode .dashboard-section .recharts-default-tooltip .recharts-tooltip-item-unit,
+body.dark-mode .dashboard-section .recharts-default-tooltip .recharts-tooltip-item-separator,
+.dark .page .recharts-default-tooltip .recharts-tooltip-label,
+.dark .page .recharts-default-tooltip .recharts-tooltip-item,
+.dark .page .recharts-default-tooltip .recharts-tooltip-item-list,
+.dark .page .recharts-default-tooltip .recharts-tooltip-item-name,
+.dark .page .recharts-default-tooltip .recharts-tooltip-item-value,
+.dark .page .recharts-default-tooltip .recharts-tooltip-item-unit,
+.dark .page .recharts-default-tooltip .recharts-tooltip-item-separator,
+body.dark-mode .page .recharts-default-tooltip .recharts-tooltip-label,
+body.dark-mode .page .recharts-default-tooltip .recharts-tooltip-item,
+body.dark-mode .page .recharts-default-tooltip .recharts-tooltip-item-list,
+body.dark-mode .page .recharts-default-tooltip .recharts-tooltip-item-name,
+body.dark-mode .page .recharts-default-tooltip .recharts-tooltip-item-value,
+body.dark-mode .page .recharts-default-tooltip .recharts-tooltip-item-unit,
+body.dark-mode .page .recharts-default-tooltip .recharts-tooltip-item-separator {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  fill: #111827 !important;
+  background: transparent !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Tooltip text can also be rendered through generic HTML elements. */
+.dark .dashboard-section .recharts-tooltip-wrapper span,
+.dark .dashboard-section .recharts-tooltip-wrapper p,
+.dark .dashboard-section .recharts-tooltip-wrapper li,
+.dark .dashboard-section .recharts-tooltip-wrapper div,
+body.dark-mode .dashboard-section .recharts-tooltip-wrapper span,
+body.dark-mode .dashboard-section .recharts-tooltip-wrapper p,
+body.dark-mode .dashboard-section .recharts-tooltip-wrapper li,
+body.dark-mode .dashboard-section .recharts-tooltip-wrapper div,
+.dark .page .recharts-tooltip-wrapper span,
+.dark .page .recharts-tooltip-wrapper p,
+.dark .page .recharts-tooltip-wrapper li,
+.dark .page .recharts-tooltip-wrapper div,
+body.dark-mode .page .recharts-tooltip-wrapper span,
+body.dark-mode .page .recharts-tooltip-wrapper p,
+body.dark-mode .page .recharts-tooltip-wrapper li,
+body.dark-mode .page .recharts-tooltip-wrapper div {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* =========================================================
+   6. RECHARTS LEGEND - DARK MODE
+   ========================================================= */
+.dark .dashboard-section .recharts-legend-item-text,
+body.dark-mode .dashboard-section .recharts-legend-item-text,
+.dark .page .recharts-legend-item-text,
+body.dark-mode .page .recharts-legend-item-text {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+/* =========================================================
+   END - FINAL DASHBOARD + ANALYTICS FIX
+   ========================================================= */
