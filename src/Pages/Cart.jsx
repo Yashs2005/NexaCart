@@ -1,443 +1,477 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
-function Cart() {
-  const [cart, setCart] = useState([]);
+function RatingStars({ rating }) {
+  const value =
+    typeof rating === "number"
+      ? rating
+      : rating?.rate ??
+        rating?.value ??
+        rating?.rating ??
+        null;
 
-  useEffect(() => {
-    const savedCart =
-      JSON.parse(localStorage.getItem("cart")) || [];
-
-    setCart(savedCart);
-  }, []);
-
-  // =========================
-  // RATING STARS
-  // =========================
-
-  function RatingStars({ rating }) {
-    const stars = [];
-
-    for (let i = 1; i <= 5; i++) {
-      // FULL STAR
-      if (rating >= i) {
-        stars.push(
-          <span
-            key={i}
-            style={{
-              color: "#f5b301",
-              fontSize: "20px",
-              lineHeight: "20px",
-              display: "inline-block",
-              width: "20px",
-              height: "20px",
-            }}
-          >
-            ★
-          </span>
-        );
-      }
-
-      // HALF STAR
-      else if (rating >= i - 0.5) {
-        stars.push(
-          <span
-            key={i}
-            style={{
-              position: "relative",
-              display: "inline-block",
-              width: "20px",
-              height: "20px",
-              fontSize: "20px",
-              lineHeight: "20px",
-            }}
-          >
-            {/* GREY STAR */}
-            <span
-              style={{
-                position: "absolute",
-                left: 0,
-                top: 0,
-                color: "#777777",
-                width: "20px",
-                height: "20px",
-              }}
-            >
-              ★
-            </span>
-
-            {/* YELLOW HALF */}
-            <span
-              style={{
-                position: "absolute",
-                left: 0,
-                top: 0,
-                color: "#f5b301",
-                width: "10px",
-                height: "20px",
-                overflow: "hidden",
-              }}
-            >
-              ★
-            </span>
-          </span>
-        );
-      }
-
-      // EMPTY STAR
-      else {
-        stars.push(
-          <span
-            key={i}
-            style={{
-              color: "#777777",
-              fontSize: "20px",
-              lineHeight: "20px",
-              display: "inline-block",
-              width: "20px",
-              height: "20px",
-            }}
-          >
-            ★
-          </span>
-        );
-      }
-    }
-
+  if (
+    value === null ||
+    value === undefined ||
+    Number.isNaN(Number(value))
+  ) {
     return (
-      <span
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: "2px",
-          height: "22px",
-        }}
-      >
-        {stars}
+      <span className="cart-no-rating">
+        No rating
       </span>
     );
   }
 
-  // =========================
-  // UPDATE QUANTITY
-  // =========================
+  const numericRating = Number(value);
 
-  const updateQuantity = (id, type) => {
-    const updatedCart = cart.map((item) => {
-      if (item.id === id) {
-        const qty =
-          type === "plus"
-            ? item.quantity + 1
-            : Math.max(
-                1,
-                item.quantity - 1
-              );
+  return (
+    <div className="cart-rating">
+      <div className="cart-stars">
+        {[1, 2, 3, 4, 5].map((star) => {
+          if (numericRating >= star) {
+            return (
+              <span
+                key={star}
+                className="cart-star-full"
+              >
+                ★
+              </span>
+            );
+          }
+
+          if (
+            numericRating >=
+            star - 0.5
+          ) {
+            return (
+              <span
+                key={star}
+                className="cart-star-half"
+              >
+                <span className="cart-star-half-base">
+                  ★
+                </span>
+
+                <span className="cart-star-half-fill">
+                  ★
+                </span>
+              </span>
+            );
+          }
+
+          return (
+            <span
+              key={star}
+              className="cart-star-empty"
+            >
+              ★
+            </span>
+          );
+        })}
+      </div>
+
+      <span className="cart-rating-number">
+        {numericRating.toFixed(1)}
+      </span>
+    </div>
+  );
+}
+
+function Cart() {
+  const navigate = useNavigate();
+
+  const [cart, setCart] = useState([]);
+
+  useEffect(() => {
+    const loadCart = () => {
+      try {
+        const saved =
+          JSON.parse(
+            localStorage.getItem(
+              "cart"
+            ) || "[]"
+          );
+
+        setCart(
+          Array.isArray(saved)
+            ? saved
+            : []
+        );
+      } catch {
+        setCart([]);
+      }
+    };
+
+    loadCart();
+
+    window.addEventListener(
+      "cartUpdated",
+      loadCart
+    );
+
+    window.addEventListener(
+      "storage",
+      loadCart
+    );
+
+    return () => {
+      window.removeEventListener(
+        "cartUpdated",
+        loadCart
+      );
+
+      window.removeEventListener(
+        "storage",
+        loadCart
+      );
+    };
+  }, []);
+
+  const updateQuantity = (
+    id,
+    change
+  ) => {
+    const updated = cart
+      .map((item) => {
+        if (item.id !== id) {
+          return item;
+        }
+
+        const quantity =
+          Number(
+            item.quantity || 1
+          ) + change;
+
+        if (quantity <= 0) {
+          return null;
+        }
 
         return {
           ...item,
-          quantity: qty,
+          quantity,
         };
-      }
+      })
+      .filter(Boolean);
 
-      return item;
-    });
-
-    setCart(updatedCart);
+    setCart(updated);
 
     localStorage.setItem(
       "cart",
-      JSON.stringify(updatedCart)
+      JSON.stringify(updated)
+    );
+
+    window.dispatchEvent(
+      new Event("cartUpdated")
     );
   };
 
-  // =========================
-  // REMOVE PRODUCT
-  // =========================
+  const removeItem = (id) => {
+    const updated =
+      cart.filter(
+        (item) =>
+          item.id !== id
+      );
 
-  const removeProduct = (id) => {
-    const updatedCart = cart.filter(
-      (item) => item.id !== id
-    );
-
-    setCart(updatedCart);
+    setCart(updated);
 
     localStorage.setItem(
       "cart",
-      JSON.stringify(updatedCart)
+      JSON.stringify(updated)
+    );
+
+    window.dispatchEvent(
+      new Event("cartUpdated")
     );
   };
 
-  // =========================
-  // GRAND TOTAL
-  // =========================
-
-  const total = cart.reduce(
+  const subtotal = cart.reduce(
     (sum, item) =>
-      sum + item.price * item.quantity,
+      sum +
+      Number(item.price || 0) *
+        Number(item.quantity || 1),
     0
   );
 
+  const delivery =
+    subtotal >= 499 || subtotal === 0
+      ? 0
+      : 40;
+
+  const handling =
+    cart.length > 0 ? 5 : 0;
+
+  const discount =
+    subtotal >= 999
+      ? Math.round(
+          subtotal * 0.05
+        )
+      : 0;
+
+  const taxableAmount =
+    subtotal -
+    discount +
+    handling;
+
+  const tax = Math.round(
+    taxableAmount * 0.05
+  );
+
+  const grandTotal =
+    subtotal -
+    discount +
+    delivery +
+    handling +
+    tax;
+
   return (
-    <div
-      style={{
-        padding: "25px",
-        background: "#f3f3f3",
-        minHeight: "100vh",
-      }}
-    >
-      <h1>🛒 Shopping Cart</h1>
+    <div className="cart-page">
+
+      <div className="cart-page-header">
+        <button
+          type="button"
+          onClick={() =>
+            navigate(
+              "/customer-view"
+            )
+          }
+        >
+          ← Continue Shopping
+        </button>
+
+        <h1>🛒 Your Cart</h1>
+      </div>
 
       {cart.length === 0 ? (
-        <div
-          style={{
-            background: "white",
-            padding: "30px",
-            borderRadius: "10px",
-            textAlign: "center",
-          }}
-        >
-          <h2>Your cart is empty.</h2>
+        <div className="cart-empty">
+          <div className="cart-empty-icon">
+            🛒
+          </div>
 
-          <Link to="/customer-view">
-            <button
-              style={{
-                padding: "12px 25px",
-                background: "#FFD814",
-                border: "none",
-                borderRadius: "25px",
-                cursor: "pointer",
-                fontWeight: "bold",
-              }}
-            >
-              🛍️ Continue Shopping
-            </button>
-          </Link>
+          <h2>
+            Your cart is empty
+          </h2>
+
+          <p>
+            Add some products to
+            your cart to continue.
+          </p>
+
+          <button
+            type="button"
+            onClick={() =>
+              navigate(
+                "/customer-view"
+              )
+            }
+          >
+            Continue Shopping
+          </button>
         </div>
       ) : (
-        <>
-          {cart.map((item) => (
-            <div
-              key={item.id}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "25px",
-                background: "white",
-                border: "1px solid #ddd",
-                padding: "20px",
-                borderRadius: "10px",
-                marginBottom: "20px",
-              }}
-            >
-              {/* PRODUCT IMAGE */}
+        <div className="cart-layout">
 
-              <img
-                src={item.image}
-                alt={item.name}
-                style={{
-                  width: "140px",
-                  height: "140px",
-                  objectFit: "contain",
-                }}
-              />
+          <div className="cart-items-panel">
 
-              {/* PRODUCT DETAILS */}
+            <div className="cart-items-title">
+              <h2>
+                Cart Items
+              </h2>
 
-              <div style={{ flex: 1 }}>
-                <h2>{item.name}</h2>
+              <span>
+                {cart.reduce(
+                  (sum, item) =>
+                    sum +
+                    Number(
+                      item.quantity || 1
+                    ),
+                  0
+                )}{" "}
+                items
+              </span>
+            </div>
 
-                {/* =========================
-                    PRODUCT RATING
-                ========================= */}
+            {cart.map((item) => (
+              <div
+                className="cart-compact-item"
+                key={item.id}
+              >
+                <img
+                  src={item.image}
+                  alt={item.name}
+                />
 
-                <div
-                  className="cart-rating"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    margin: "8px 0 12px",
-                    minHeight: "24px",
-                  }}
-                >
-                  {item.rating !== null &&
-                  item.rating !== undefined &&
-                  !isNaN(Number(item.rating)) ? (
-                    <>
-                      <RatingStars
-                        rating={Number(
-                          item.rating
-                        )}
-                      />
+                <div className="cart-compact-details">
+                  <h3>
+                    {item.name}
+                  </h3>
 
-                      <span
-                        className="cart-rating-number"
-                        style={{
-                          fontSize: "15px",
-                          fontWeight: "600",
-                        }}
-                      >
-                        {Number(
-                          item.rating
-                        ).toFixed(1)}
-                      </span>
-                    </>
-                  ) : (
-                    <span
-                      className="cart-no-rating"
-                      style={{
-                        fontSize: "14px",
-                        fontWeight: "500",
-                      }}
-                    >
-                      No rating
-                    </span>
-                  )}
+                  <RatingStars
+                    rating={
+                      item.rating
+                    }
+                  />
+
+                  <p>
+                    {item.category ||
+                      "General"}
+                  </p>
+
+                  <strong>
+                    ₹
+                    {Number(
+                      item.price || 0
+                    ).toLocaleString(
+                      "en-IN"
+                    )}
+                  </strong>
                 </div>
 
-                {/* PRICE */}
-
-                <p
-                  style={{
-                    fontSize: "18px",
-                    fontWeight: "bold",
-                    color: "#B12704",
-                  }}
-                >
-                  ₹{item.price.toLocaleString()}
-                </p>
-
-                {/* UNIT */}
-
-                <p
-                  style={{
-                    color: "#555",
-                    fontWeight: "bold",
-                  }}
-                >
-                  📦 ₹{item.price.toLocaleString()} /{" "}
-                  {item.unit || "1 Piece"}
-                </p>
-
-                {/* QUANTITY */}
-
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    margin: "15px 0",
-                  }}
-                >
+                <div className="cart-compact-quantity">
                   <button
+                    type="button"
                     onClick={() =>
                       updateQuantity(
                         item.id,
-                        "minus"
+                        -1
                       )
                     }
-                    style={{
-                      padding: "7px 14px",
-                      cursor: "pointer",
-                    }}
                   >
-                    ➖
+                    −
                   </button>
 
-                  <span
-                    style={{
-                      margin: "0 18px",
-                      fontSize: "20px",
-                      fontWeight: "bold",
-                    }}
-                  >
+                  <span>
                     {item.quantity}
                   </span>
 
                   <button
+                    type="button"
                     onClick={() =>
                       updateQuantity(
                         item.id,
-                        "plus"
+                        1
                       )
                     }
-                    style={{
-                      padding: "7px 14px",
-                      cursor: "pointer",
-                    }}
                   >
-                    ➕
+                    +
                   </button>
                 </div>
 
-                {/* TOTAL */}
+                <div className="cart-compact-total">
+                  <strong>
+                    ₹
+                    {(
+                      Number(
+                        item.price || 0
+                      ) *
+                      Number(
+                        item.quantity ||
+                          1
+                      )
+                    ).toLocaleString(
+                      "en-IN"
+                    )}
+                  </strong>
 
-                <h3>
-                  Product Total: ₹
-                  {(
-                    item.price *
-                    item.quantity
-                  ).toLocaleString()}
-                </h3>
-
-                <p style={{ color: "#666" }}>
-                  {item.quantity} ×{" "}
-                  {item.unit || "1 Piece"}
-                </p>
-
-                {/* REMOVE */}
-
-                <button
-                  onClick={() =>
-                    removeProduct(item.id)
-                  }
-                  style={{
-                    background: "#ffdddd",
-                    border: "none",
-                    padding: "8px 15px",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                    color: "#b00000",
-                    fontWeight: "bold",
-                  }}
-                >
-                  ❌ Remove
-                </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      removeItem(
+                        item.id
+                      )
+                    }
+                  >
+                    Remove
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
 
-          {/* GRAND TOTAL */}
+          <aside className="cart-order-summary">
 
-          <div
-            style={{
-              background: "white",
-              padding: "25px",
-              borderRadius: "10px",
-              marginTop: "25px",
-            }}
-          >
             <h2>
-              Grand Total: ₹
-              {total.toLocaleString()}
+              Order Summary
             </h2>
 
-            <Link to="/checkout">
-              <button
-                style={{
-                  background: "#FFA41C",
-                  padding: "14px 30px",
-                  border: "none",
-                  borderRadius: "25px",
-                  cursor: "pointer",
-                  fontWeight: "bold",
-                  fontSize: "16px",
-                }}
-              >
-                💳 Proceed to Checkout
-              </button>
-            </Link>
-          </div>
-        </>
+            <div>
+              <span>Subtotal</span>
+              <strong>
+                ₹
+                {subtotal.toLocaleString(
+                  "en-IN"
+                )}
+              </strong>
+            </div>
+
+            <div>
+              <span>Delivery</span>
+              <strong>
+                {delivery === 0
+                  ? "FREE"
+                  : `₹${delivery}`}
+              </strong>
+            </div>
+
+            <div>
+              <span>Handling</span>
+              <strong>
+                ₹{handling}
+              </strong>
+            </div>
+
+            {discount > 0 && (
+              <div>
+                <span>Discount</span>
+                <strong>
+                  -₹
+                  {discount.toLocaleString(
+                    "en-IN"
+                  )}
+                </strong>
+              </div>
+            )}
+
+            <div>
+              <span>GST / Tax</span>
+              <strong>
+                ₹
+                {tax.toLocaleString(
+                  "en-IN"
+                )}
+              </strong>
+            </div>
+
+            <div className="cart-summary-grand">
+              <span>
+                Grand Total
+              </span>
+
+              <strong>
+                ₹
+                {grandTotal.toLocaleString(
+                  "en-IN"
+                )}
+              </strong>
+            </div>
+
+            <button
+              type="button"
+              className="cart-checkout-main-btn"
+              onClick={() =>
+                navigate(
+                  "/checkout",
+                  {
+                    state: {
+                      cart,
+                    },
+                  }
+                )
+              }
+            >
+              Proceed to Checkout →
+            </button>
+          </aside>
+        </div>
       )}
     </div>
   );

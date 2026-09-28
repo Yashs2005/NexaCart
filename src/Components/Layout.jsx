@@ -446,9 +446,15 @@ function Layout({ darkMode, setDarkMode }) {
 
             <button
               type="button"
-              onClick={() =>
-                navigate("/cart")
-              }
+             onClick={() => {
+              if (location.pathname === "/customer-view") {
+              window.dispatchEvent(
+              new Event("openCartDrawer")
+             );
+             } else {
+              navigate("/cart");
+             }
+            }}
               title="Cart"
               aria-label={`Cart with ${cartCount} items`}
               className="header-icon-btn cart-icon-btn"
