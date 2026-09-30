@@ -12515,3 +12515,75 @@ body.dark-mode .page .recharts-legend-item-text {
     font-size: 13px !important;
   }
 }
+
+/* =========================================================
+   PASSWORD SHOW / HIDE EYE
+========================================================= */
+
+.password-input-box {
+  position: relative;
+}
+
+.password-input-box input {
+  padding-right: 48px;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+
+  width: 34px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+  margin: 0;
+
+  border: none;
+  background: transparent;
+
+  color: #666;
+
+  cursor: pointer;
+
+  border-radius: 50%;
+
+  transition:
+    color 0.2s ease,
+    background 0.2s ease;
+}
+
+.password-toggle-btn:hover {
+  color: #222;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.password-toggle-btn:focus {
+  outline: none;
+}
+
+.password-toggle-btn:focus-visible {
+  outline: 2px solid #2874f0;
+  outline-offset: 2px;
+}
+
+.password-toggle-btn svg {
+  display: block;
+  pointer-events: none;
+}
+
+/* DARK MODE */
+
+.app.dark .password-toggle-btn {
+  color: #bdbdbd;
+}
+
+.app.dark .password-toggle-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
