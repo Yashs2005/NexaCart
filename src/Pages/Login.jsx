@@ -1,57 +1,99 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-function EyeIcon({ visible }) {
-  if (visible) {
-    return (
-      <svg
-        width="21"
-        height="21"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-      >
-        <path d="M2.06 12.35a1 1 0 0 1 0-.7C3.2 8.3 7.08 5 12 5c4.92 0 8.8 3.3 9.94 6.65a1 1 0 0 1 0 .7C20.8 15.7 16.92 19 12 19c-4.92 0-8.8-3.3-9.94-6.65Z" />
-        <circle
-          cx="12"
-          cy="12"
-          r="3"
-        />
-      </svg>
-    );
-  }
-
+function PasswordEye({ show, onClick, label }) {
   return (
-    <svg
-      width="21"
-      height="21"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
+    <button
+      type="button"
+      className="login-password-eye"
+      onClick={onClick}
+      aria-label={label}
+      title={label}
     >
-      <path d="M3 3l18 18" />
-      <path d="M10.58 10.58a2 2 0 0 0 2.83 2.83" />
-      <path d="M9.88 5.09A10.6 10.6 0 0 1 12 5c4.92 0 8.8 3.3 9.94 6.65a1 1 0 0 1 0 .7 10.9 10.9 0 0 1-4.02 4.75" />
-      <path d="M6.61 6.61A10.9 10.9 0 0 0 2.06 11.65a1 1 0 0 0 0 .7C3.2 15.7 7.08 19 12 19a10.6 10.6 0 0 0 2.12-.21" />
-    </svg>
+      <svg
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+        focusable="false"
+      >
+        {show ? (
+          <>
+            {/* Eye */}
+            <path
+              d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+
+            {/* Pupil */}
+            <circle
+              cx="12"
+              cy="12"
+              r="2.5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            />
+          </>
+        ) : (
+          <>
+            {/* Eye */}
+            <path
+              d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+
+            {/* Pupil */}
+            <circle
+              cx="12"
+              cy="12"
+              r="2.5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            />
+
+            {/* Slash */}
+            <path
+              d="M4 4l16 16"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+          </>
+        )}
+      </svg>
+    </button>
   );
 }
 
 function Login() {
   const navigate = useNavigate();
 
+  // =====================================================
+  // REMEMBERED EMAIL
+  // =====================================================
+
   const savedEmail =
     localStorage.getItem("rememberedEmail") || "";
 
+  // =====================================================
+  // MODE
+  // login / register / forgot
+  // =====================================================
+
   const [mode, setMode] = useState("login");
+
+  // =====================================================
+  // LOGIN
+  // =====================================================
 
   const [email, setEmail] =
     useState(savedEmail);
@@ -62,8 +104,12 @@ function Login() {
   const [rememberMe, setRememberMe] =
     useState(savedEmail !== "");
 
-  const [showLoginPassword, setShowLoginPassword] =
+  const [showPassword, setShowPassword] =
     useState(false);
+
+  // =====================================================
+  // REGISTER
+  // =====================================================
 
   const [registerName, setRegisterName] =
     useState("");
@@ -89,6 +135,10 @@ function Login() {
     setShowRegisterConfirmPassword,
   ] = useState(false);
 
+  // =====================================================
+  // FORGOT PASSWORD
+  // =====================================================
+
   const [forgotEmail, setForgotEmail] =
     useState("");
 
@@ -100,26 +150,25 @@ function Login() {
     setConfirmNewPassword,
   ] = useState("");
 
-  const [
-    showNewPassword,
-    setShowNewPassword,
-  ] = useState(false);
+  const [showNewPassword, setShowNewPassword] =
+    useState(false);
 
   const [
     showConfirmNewPassword,
     setShowConfirmNewPassword,
   ] = useState(false);
 
-  // =========================================================
+  // =====================================================
   // LOGIN
-  // =========================================================
+  // =====================================================
 
   function handleLogin(e) {
     e.preventDefault();
 
     const registeredUser = JSON.parse(
-      localStorage.getItem("registeredUser") ||
-        "null"
+      localStorage.getItem(
+        "registeredUser"
+      ) || "null"
     );
 
     const defaultEmail =
@@ -171,13 +220,15 @@ function Login() {
 
       navigate("/");
     } else {
-      alert("Invalid Email or Password");
+      alert(
+        "Invalid Email or Password"
+      );
     }
   }
 
-  // =========================================================
+  // =====================================================
   // REGISTER
-  // =========================================================
+  // =====================================================
 
   function handleRegister(e) {
     e.preventDefault();
@@ -187,7 +238,9 @@ function Login() {
       !registerEmail ||
       !registerPassword
     ) {
-      alert("Please fill all fields.");
+      alert(
+        "Please fill all fields."
+      );
       return;
     }
 
@@ -195,11 +248,15 @@ function Login() {
       registerPassword !==
       registerConfirmPassword
     ) {
-      alert("Passwords do not match.");
+      alert(
+        "Passwords do not match."
+      );
       return;
     }
 
-    if (registerPassword.length < 6) {
+    if (
+      registerPassword.length < 6
+    ) {
       alert(
         "Password must be at least 6 characters."
       );
@@ -214,7 +271,9 @@ function Login() {
 
     localStorage.setItem(
       "registeredUser",
-      JSON.stringify(registeredUser)
+      JSON.stringify(
+        registeredUser
+      )
     );
 
     alert(
@@ -235,16 +294,17 @@ function Login() {
     setMode("login");
   }
 
-  // =========================================================
+  // =====================================================
   // FORGOT PASSWORD
-  // =========================================================
+  // =====================================================
 
   function handleForgotPassword(e) {
     e.preventDefault();
 
     const registeredUser = JSON.parse(
-      localStorage.getItem("registeredUser") ||
-        "null"
+      localStorage.getItem(
+        "registeredUser"
+      ) || "null"
     );
 
     const defaultEmail =
@@ -253,9 +313,12 @@ function Login() {
     if (
       forgotEmail !== defaultEmail &&
       (!registeredUser ||
-        forgotEmail !== registeredUser.email)
+        forgotEmail !==
+          registeredUser.email)
     ) {
-      alert("Email address not found.");
+      alert(
+        "Email address not found."
+      );
       return;
     }
 
@@ -273,18 +336,24 @@ function Login() {
       newPassword !==
       confirmNewPassword
     ) {
-      alert("Passwords do not match.");
+      alert(
+        "Passwords do not match."
+      );
       return;
     }
 
-    if (newPassword.length < 6) {
+    if (
+      newPassword.length < 6
+    ) {
       alert(
         "Password must be at least 6 characters."
       );
       return;
     }
 
-    if (forgotEmail === defaultEmail) {
+    if (
+      forgotEmail === defaultEmail
+    ) {
       alert(
         "Demo admin password cannot be changed because it is fixed in the application."
       );
@@ -296,7 +365,9 @@ function Login() {
 
     localStorage.setItem(
       "registeredUser",
-      JSON.stringify(registeredUser)
+      JSON.stringify(
+        registeredUser
+      )
     );
 
     alert(
@@ -316,9 +387,9 @@ function Login() {
     setMode("login");
   }
 
-  // =========================================================
+  // =====================================================
   // LOGIN SCREEN
-  // =========================================================
+  // =====================================================
 
   if (mode === "login") {
     return (
@@ -337,7 +408,6 @@ function Login() {
               <label>Email</label>
 
               <div className="login-input-box">
-
                 <input
                   type="email"
                   placeholder="Enter Email"
@@ -353,7 +423,6 @@ function Login() {
                 <span className="login-icon">
                   👤
                 </span>
-
               </div>
             </div>
 
@@ -366,7 +435,7 @@ function Login() {
 
                 <input
                   type={
-                    showLoginPassword
+                    showPassword
                       ? "text"
                       : "password"
                   }
@@ -380,32 +449,20 @@ function Login() {
                   required
                 />
 
-                <button
-                  type="button"
-                  className="password-toggle-btn"
+                <PasswordEye
+                  show={showPassword}
                   onClick={() =>
-                    setShowLoginPassword(
+                    setShowPassword(
                       (previous) =>
                         !previous
                     )
                   }
-                  aria-label={
-                    showLoginPassword
+                  label={
+                    showPassword
                       ? "Hide password"
                       : "Show password"
                   }
-                  title={
-                    showLoginPassword
-                      ? "Hide password"
-                      : "Show password"
-                  }
-                >
-                  <EyeIcon
-                    visible={
-                      showLoginPassword
-                    }
-                  />
-                </button>
+                />
 
               </div>
             </div>
@@ -444,6 +501,8 @@ function Login() {
 
             </div>
 
+            {/* LOGIN */}
+
             <button
               type="submit"
               className="login-button"
@@ -472,9 +531,9 @@ function Login() {
     );
   }
 
-  // =========================================================
+  // =====================================================
   // REGISTER SCREEN
-  // =========================================================
+  // =====================================================
 
   if (mode === "register") {
     return (
@@ -493,7 +552,6 @@ function Login() {
               <label>Name</label>
 
               <div className="login-input-box">
-
                 <input
                   type="text"
                   placeholder="Enter Name"
@@ -505,7 +563,6 @@ function Login() {
                   }
                   required
                 />
-
               </div>
             </div>
 
@@ -515,7 +572,6 @@ function Login() {
               <label>Email</label>
 
               <div className="login-input-box">
-
                 <input
                   type="email"
                   placeholder="Enter Email"
@@ -527,11 +583,10 @@ function Login() {
                   }
                   required
                 />
-
               </div>
             </div>
 
-            {/* PASSWORD */}
+            {/* REGISTER PASSWORD */}
 
             <div className="login-field">
               <label>Password</label>
@@ -554,32 +609,22 @@ function Login() {
                   required
                 />
 
-                <button
-                  type="button"
-                  className="password-toggle-btn"
+                <PasswordEye
+                  show={
+                    showRegisterPassword
+                  }
                   onClick={() =>
                     setShowRegisterPassword(
                       (previous) =>
                         !previous
                     )
                   }
-                  aria-label={
+                  label={
                     showRegisterPassword
                       ? "Hide password"
                       : "Show password"
                   }
-                  title={
-                    showRegisterPassword
-                      ? "Hide password"
-                      : "Show password"
-                  }
-                >
-                  <EyeIcon
-                    visible={
-                      showRegisterPassword
-                    }
-                  />
-                </button>
+                />
 
               </div>
             </div>
@@ -611,32 +656,22 @@ function Login() {
                   required
                 />
 
-                <button
-                  type="button"
-                  className="password-toggle-btn"
+                <PasswordEye
+                  show={
+                    showRegisterConfirmPassword
+                  }
                   onClick={() =>
                     setShowRegisterConfirmPassword(
                       (previous) =>
                         !previous
                     )
                   }
-                  aria-label={
+                  label={
                     showRegisterConfirmPassword
                       ? "Hide password"
                       : "Show password"
                   }
-                  title={
-                    showRegisterConfirmPassword
-                      ? "Hide password"
-                      : "Show password"
-                  }
-                >
-                  <EyeIcon
-                    visible={
-                      showRegisterConfirmPassword
-                    }
-                  />
-                </button>
+                />
 
               </div>
             </div>
@@ -669,9 +704,9 @@ function Login() {
     );
   }
 
-  // =========================================================
+  // =====================================================
   // FORGOT PASSWORD SCREEN
-  // =========================================================
+  // =====================================================
 
   return (
     <div className="login-page">
@@ -681,7 +716,11 @@ function Login() {
           Reset Password
         </div>
 
-        <form onSubmit={handleForgotPassword}>
+        <form
+          onSubmit={
+            handleForgotPassword
+          }
+        >
 
           {/* EMAIL */}
 
@@ -689,7 +728,6 @@ function Login() {
             <label>Email</label>
 
             <div className="login-input-box">
-
               <input
                 type="email"
                 placeholder="Enter Registered Email"
@@ -701,7 +739,6 @@ function Login() {
                 }
                 required
               />
-
             </div>
           </div>
 
@@ -728,32 +765,20 @@ function Login() {
                 required
               />
 
-              <button
-                type="button"
-                className="password-toggle-btn"
+              <PasswordEye
+                show={showNewPassword}
                 onClick={() =>
                   setShowNewPassword(
                     (previous) =>
                       !previous
                   )
                 }
-                aria-label={
+                label={
                   showNewPassword
                     ? "Hide password"
                     : "Show password"
                 }
-                title={
-                  showNewPassword
-                    ? "Hide password"
-                    : "Show password"
-                }
-              >
-                <EyeIcon
-                  visible={
-                    showNewPassword
-                  }
-                />
-              </button>
+              />
 
             </div>
           </div>
@@ -785,32 +810,22 @@ function Login() {
                 required
               />
 
-              <button
-                type="button"
-                className="password-toggle-btn"
+              <PasswordEye
+                show={
+                  showConfirmNewPassword
+                }
                 onClick={() =>
                   setShowConfirmNewPassword(
                     (previous) =>
                       !previous
                   )
                 }
-                aria-label={
+                label={
                   showConfirmNewPassword
                     ? "Hide password"
                     : "Show password"
                 }
-                title={
-                  showConfirmNewPassword
-                    ? "Hide password"
-                    : "Show password"
-                }
-              >
-                <EyeIcon
-                  visible={
-                    showConfirmNewPassword
-                  }
-                />
-              </button>
+              />
 
             </div>
           </div>

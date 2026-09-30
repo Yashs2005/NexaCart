@@ -12517,73 +12517,151 @@ body.dark-mode .page .recharts-legend-item-text {
 }
 
 /* =========================================================
-   PASSWORD SHOW / HIDE EYE
+   NEXACART PASSWORD EYE
+   FINAL VERSION - SINGLE STABLE ICON
 ========================================================= */
 
 .password-input-box {
-  position: relative;
+  position: relative !important;
 }
 
-.password-input-box input {
-  padding-right: 48px;
+/* Password input ke liye eye ki jagah */
+.password-input-box input[type="password"],
+.password-input-box input[type="text"] {
+  width: 100% !important;
+  padding-right: 48px !important;
 }
 
-.password-toggle-btn {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
+/* Browser ka built-in password eye/reveal icon hide */
+.password-input-box input::-ms-reveal,
+.password-input-box input::-ms-clear {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
 
-  width: 34px;
-  height: 34px;
+.password-input-box input::-webkit-credentials-auto-fill-button,
+.password-input-box input::-webkit-contacts-auto-fill-button {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* =========================================================
+   SINGLE EYE
+========================================================= */
 
-  padding: 0;
-  margin: 0;
+.login-password-eye {
+  position: absolute !important;
 
-  border: none;
-  background: transparent;
+  top: 50% !important;
+  right: 12px !important;
 
-  color: #666;
+  width: 28px !important;
+  height: 28px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  padding: 0 !important;
+  margin: 0 !important;
+
+  border: 0 !important;
+  outline: 0 !important;
+  border-radius: 0 !important;
+
+  background: transparent !important;
+  background-color: transparent !important;
+
+  color: #555 !important;
+
+  box-shadow: none !important;
 
   cursor: pointer;
 
-  border-radius: 50%;
+  flex: 0 0 28px;
 
-  transition:
-    color 0.2s ease,
-    background 0.2s ease;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+
+  transform: translateY(-50%) !important;
+
+  transition: color 0.15s ease !important;
 }
 
-.password-toggle-btn:hover {
-  color: #222;
-  background: rgba(0, 0, 0, 0.06);
+/* Hover */
+.login-password-eye:hover {
+  position: absolute !important;
+
+  top: 50% !important;
+  right: 12px !important;
+
+  width: 28px !important;
+  height: 28px !important;
+
+  padding: 0 !important;
+  margin: 0 !important;
+
+  border: 0 !important;
+  outline: 0 !important;
+
+  background: transparent !important;
+  background-color: transparent !important;
+
+  color: #333 !important;
+
+  box-shadow: none !important;
+
+  transform: translateY(-50%) !important;
 }
 
-.password-toggle-btn:focus {
-  outline: none;
+/* Focus / click */
+.login-password-eye:focus,
+.login-password-eye:focus-visible,
+.login-password-eye:active {
+  position: absolute !important;
+
+  top: 50% !important;
+  right: 12px !important;
+
+  width: 28px !important;
+  height: 28px !important;
+
+  padding: 0 !important;
+  margin: 0 !important;
+
+  border: 0 !important;
+  outline: 0 !important;
+
+  background: transparent !important;
+  background-color: transparent !important;
+
+  color: #333 !important;
+
+  box-shadow: none !important;
+
+  transform: translateY(-50%) !important;
 }
 
-.password-toggle-btn:focus-visible {
-  outline: 2px solid #2874f0;
-  outline-offset: 2px;
-}
+/* SVG */
+.login-password-eye svg {
+  width: 19px !important;
+  height: 19px !important;
 
-.password-toggle-btn svg {
-  display: block;
+  display: block !important;
+
+  padding: 0 !important;
+  margin: 0 !important;
+
+  flex: 0 0 19px;
+
+  color: currentColor !important;
+
+  transform: none !important;
+
+  transition: none !important;
+  animation: none !important;
+
   pointer-events: none;
-}
-
-/* DARK MODE */
-
-.app.dark .password-toggle-btn {
-  color: #bdbdbd;
-}
-
-.app.dark .password-toggle-btn:hover {
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.08);
 }

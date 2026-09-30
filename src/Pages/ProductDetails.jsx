@@ -1,5 +1,15 @@
-import { Link, useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import {
+  Link,
+  useParams,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
+
+import {
+  useEffect,
+  useState,
+} from "react";
+
 import { productsData } from "../data";
 
 // =========================================================
@@ -24,10 +34,31 @@ function getProductImage(product) {
 
 function ProductDetails() {
   const { id } = useParams();
+
   const navigate = useNavigate();
 
-  const [product, setProduct] = useState(null);
-  const [quantity, setQuantity] = useState(1);
+  const location = useLocation();
+
+  // =======================================================
+  // CATEGORY FROM CUSTOMER VIEW
+  //
+  // CustomerView sends:
+  //
+  // state: {
+  //   fromCategory: selectedCategory
+  // }
+  //
+  // =======================================================
+
+  const fromCategory =
+    location.state?.fromCategory ||
+    null;
+
+  const [product, setProduct] =
+    useState(null);
+
+  const [quantity, setQuantity] =
+    useState(1);
 
   // =======================================================
   // LOAD PRODUCT
@@ -35,14 +66,24 @@ function ProductDetails() {
 
   useEffect(() => {
     try {
-      const foundProduct = productsData.find(
-        (item) => Number(item.id) === Number(id)
+      const foundProduct =
+        productsData.find(
+          (item) =>
+            Number(item.id) ===
+            Number(id)
+        );
+
+      setProduct(
+        foundProduct || null
       );
 
-      setProduct(foundProduct || null);
       setQuantity(1);
     } catch (error) {
-      console.error("Product loading error:", error);
+      console.error(
+        "Product loading error:",
+        error
+      );
+
       setProduct(null);
     }
   }, [id]);
@@ -54,13 +95,22 @@ function ProductDetails() {
   if (!product) {
     return (
       <div className="product-details-not-found">
-        <h2>Product not found</h2>
 
-        <Link to="/customer-view">
-          <button type="button">
-            ⬅ Back to Customer View
-          </button>
-        </Link>
+        <h2>
+          Product not found
+        </h2>
+
+        <button
+          type="button"
+          onClick={() =>
+            navigate(
+              "/customer-view"
+            )
+          }
+        >
+          ⬅ Back to Customer View
+        </button>
+
       </div>
     );
   }
@@ -69,9 +119,14 @@ function ProductDetails() {
   // RATING
   // =======================================================
 
-  let rating = product.rating;
+  let rating =
+    product.rating;
 
-  if (typeof rating === "object" && rating !== null) {
+  if (
+    typeof rating ===
+      "object" &&
+    rating !== null
+  ) {
     rating =
       rating.rate ??
       rating.value ??
@@ -99,8 +154,14 @@ function ProductDetails() {
   // RATING STARS
   // =======================================================
 
-  function RatingStars({ rating }) {
-    if (!Number.isFinite(Number(rating))) {
+  function RatingStars({
+    rating,
+  }) {
+    if (
+      !Number.isFinite(
+        Number(rating)
+      )
+    ) {
       return (
         <span className="product-detail-no-rating">
           No rating
@@ -108,150 +169,264 @@ function ProductDetails() {
       );
     }
 
-    const numeric = Number(rating);
+    const numeric =
+      Number(rating);
 
     return (
       <div className="product-detail-rating-stars">
-        {[1, 2, 3, 4, 5].map((star) => {
-          // FULL STAR
-          if (numeric >= star) {
+
+        {[1, 2, 3, 4, 5].map(
+          (star) => {
+
+            // FULL STAR
+
+            if (
+              numeric >= star
+            ) {
+              return (
+                <span
+                  key={star}
+                  className="product-detail-star full"
+                >
+                  ★
+                </span>
+              );
+            }
+
+            // HALF STAR
+
+            if (
+              numeric >=
+              star - 0.5
+            ) {
+              return (
+                <span
+                  key={star}
+                  className="product-detail-star half"
+                >
+
+                  <span className="product-detail-star-empty">
+                    ★
+                  </span>
+
+                  <span className="product-detail-star-filled">
+                    ★
+                  </span>
+
+                </span>
+              );
+            }
+
+            // EMPTY STAR
+
             return (
               <span
                 key={star}
-                className="product-detail-star full"
+                className="product-detail-star empty"
               >
                 ★
               </span>
             );
           }
+        )}
 
-          // HALF STAR
-          if (numeric >= star - 0.5) {
-            return (
-              <span
-                key={star}
-                className="product-detail-star half"
-              >
-                <span className="product-detail-star-empty">
-                  ★
-                </span>
-
-                <span className="product-detail-star-filled">
-                  ★
-                </span>
-              </span>
-            );
-          }
-
-          // EMPTY STAR
-          return (
-            <span
-              key={star}
-              className="product-detail-star empty"
-            >
-              ★
-            </span>
-          );
-        })}
       </div>
     );
   }
 
   // =======================================================
+  // SAFE VALUES
+  // =======================================================
+
+  const price =
+    Number(
+      product.price || 0
+    );
+
+  const stock =
+    Number(
+      product.stock || 0
+    );
+
+  const image =
+    getProductImage(
+      product
+    );
+
+  // =======================================================
   // ADD TO CART
   // =======================================================
 
-  const handleAddToCart = () => {
-    try {
-      const savedCart = JSON.parse(
-        localStorage.getItem("cart") || "[]"
-      );
+  const handleAddToCart =
+    () => {
 
-      const cart = Array.isArray(savedCart)
-        ? savedCart
-        : [];
+      try {
 
-      const existingProduct = cart.find(
-        (item) =>
-          Number(item.id) === Number(product.id)
-      );
+        const savedCart =
+          JSON.parse(
+            localStorage.getItem(
+              "cart"
+            ) || "[]"
+          );
 
-      let updatedCart;
+        const cart =
+          Array.isArray(
+            savedCart
+          )
+            ? savedCart
+            : [];
 
-      if (existingProduct) {
-        updatedCart = cart.map((item) =>
-          Number(item.id) === Number(product.id)
-            ? {
-                ...item,
-                quantity:
-                  Number(item.quantity || 1) +
-                  quantity,
-              }
-            : item
+        const existingProduct =
+          cart.find(
+            (item) =>
+              Number(
+                item.id
+              ) ===
+              Number(
+                product.id
+              )
+          );
+
+        let updatedCart;
+
+        if (
+          existingProduct
+        ) {
+
+          updatedCart =
+            cart.map(
+              (item) =>
+                Number(
+                  item.id
+                ) ===
+                Number(
+                  product.id
+                )
+                  ? {
+                      ...item,
+
+                      quantity:
+                        Number(
+                          item.quantity ||
+                            1
+                        ) +
+                        quantity,
+                    }
+                  : item
+            );
+
+        } else {
+
+          updatedCart = [
+            ...cart,
+
+            {
+              ...product,
+              quantity,
+            },
+          ];
+
+        }
+
+        localStorage.setItem(
+          "cart",
+          JSON.stringify(
+            updatedCart
+          )
         );
-      } else {
-        updatedCart = [
-          ...cart,
-          {
-            ...product,
-            quantity,
-          },
-        ];
+
+        window.dispatchEvent(
+          new Event(
+            "cartUpdated"
+          )
+        );
+
+        alert(
+          "✅ Product added to Cart"
+        );
+
+        navigate("/cart");
+
+      } catch (error) {
+
+        console.error(
+          "Cart update failed:",
+          error
+        );
+
       }
-
-      localStorage.setItem(
-        "cart",
-        JSON.stringify(updatedCart)
-      );
-
-      alert("✅ Product added to Cart");
-
-      navigate("/cart");
-    } catch (error) {
-      console.error(
-        "Cart update failed:",
-        error
-      );
-    }
-  };
+    };
 
   // =======================================================
   // BUY NOW
   // =======================================================
 
-  const handleBuyNow = () => {
-    if (stock <= 0) {
-      return;
-    }
+  const handleBuyNow =
+    () => {
 
-    const buyNowCart = [
-      {
-        ...product,
-        quantity,
-      },
-    ];
+      if (
+        stock <= 0
+      ) {
+        return;
+      }
 
-    localStorage.setItem(
-      "cart",
-      JSON.stringify(buyNowCart)
-    );
+      const buyNowCart = [
+        {
+          ...product,
+          quantity,
+        },
+      ];
 
-    navigate("/checkout", {
-      state: {
-        cart: buyNowCart,
-      },
-    });
-  };
+      localStorage.setItem(
+        "cart",
+        JSON.stringify(
+          buyNowCart
+        )
+      );
+
+      navigate(
+        "/checkout",
+        {
+          state: {
+            cart:
+              buyNowCart,
+          },
+        }
+      );
+    };
 
   // =======================================================
-  // SAFE VALUES
+  // BACK TO PRODUCTS
+  //
+  // This returns to the SAME CATEGORY.
+  //
+  // Example:
+  //
+  // Electronics
+  //    ↓
+  // 20 products
+  //    ↓
+  // iPhone
+  //    ↓
+  // Back to Products
+  //    ↓
+  // Electronics 20 products
+  //
   // =======================================================
 
-  const price = Number(product.price || 0);
+  const handleBackToProducts =
+    () => {
 
-  const stock = Number(product.stock || 0);
-
-  const image = getProductImage(product);
+      navigate(
+        "/customer-view",
+        {
+          state: {
+            selectedCategory:
+              fromCategory,
+          },
+        }
+      );
+    };
 
   // =======================================================
   // UI
@@ -269,21 +444,27 @@ function ProductDetails() {
         <div className="product-details-image-wrap">
 
           {image ? (
+
             <img
               src={image}
               alt={product.name}
               className="product-details-image"
               onError={(event) => {
+
                 event.currentTarget.style.display =
                   "none";
 
                 event.currentTarget.parentElement?.classList.add(
                   "image-error"
                 );
+
               }}
             />
+
           ) : (
+
             <div className="product-details-no-image">
+
               <span className="product-details-no-image-icon">
                 🛍️
               </span>
@@ -295,7 +476,9 @@ function ProductDetails() {
               <small>
                 Image not available
               </small>
+
             </div>
+
           )}
 
         </div>
@@ -319,19 +502,27 @@ function ProductDetails() {
         <div className="product-details-rating-row">
 
           {rating !== null ? (
+
             <>
+
               <RatingStars
                 rating={rating}
               />
 
               <span className="product-details-rating-number">
-                {rating.toFixed(1)}
+                {rating.toFixed(
+                  1
+                )}
               </span>
+
             </>
+
           ) : (
+
             <span className="product-detail-no-rating">
               No rating
             </span>
+
           )}
 
         </div>
@@ -341,15 +532,22 @@ function ProductDetails() {
         {/* PRICE */}
 
         <h2 className="product-details-price">
-          ₹{price.toLocaleString("en-IN")}
+          ₹
+          {price.toLocaleString(
+            "en-IN"
+          )}
         </h2>
 
         {/* UNIT */}
 
         <p className="product-details-unit">
           📦 Price: ₹
-          {price.toLocaleString("en-IN")} /{" "}
-          {product.unit || "1 Piece"}
+          {price.toLocaleString(
+            "en-IN"
+          )}{" "}
+          /{" "}
+          {product.unit ||
+            "1 Piece"}
         </p>
 
         <p className="product-details-tax">
@@ -383,11 +581,19 @@ function ProductDetails() {
           <button
             type="button"
             onClick={() => {
-              if (quantity > 1) {
-                setQuantity(quantity - 1);
+
+              if (
+                quantity > 1
+              ) {
+                setQuantity(
+                  quantity - 1
+                );
               }
+
             }}
-            disabled={quantity <= 1}
+            disabled={
+              quantity <= 1
+            }
           >
             ➖
           </button>
@@ -399,13 +605,21 @@ function ProductDetails() {
           <button
             type="button"
             onClick={() => {
-              if (quantity < stock) {
-                setQuantity(quantity + 1);
+
+              if (
+                quantity <
+                stock
+              ) {
+                setQuantity(
+                  quantity + 1
+                );
               }
+
             }}
             disabled={
               stock <= 0 ||
-              quantity >= stock
+              quantity >=
+                stock
             }
           >
             ➕
@@ -417,14 +631,18 @@ function ProductDetails() {
 
         <h2 className="product-details-total">
           Total: ₹
-          {(price * quantity).toLocaleString(
+          {(
+            price *
+            quantity
+          ).toLocaleString(
             "en-IN"
           )}
         </h2>
 
         <p className="product-details-total-unit">
           {quantity} ×{" "}
-          {product.unit || "1 Piece"}
+          {product.unit ||
+            "1 Piece"}
         </p>
 
         {/* ACTION BUTTONS */}
@@ -434,8 +652,12 @@ function ProductDetails() {
           <button
             type="button"
             className="product-details-cart-btn"
-            onClick={handleAddToCart}
-            disabled={stock <= 0}
+            onClick={
+              handleAddToCart
+            }
+            disabled={
+              stock <= 0
+            }
           >
             🛒 Add to Cart
           </button>
@@ -443,24 +665,34 @@ function ProductDetails() {
           <button
             type="button"
             className="product-details-buy-btn"
-            onClick={handleBuyNow}
-            disabled={stock <= 0}
+            onClick={
+              handleBuyNow
+            }
+            disabled={
+              stock <= 0
+            }
           >
             ⚡ Buy Now
           </button>
 
         </div>
 
-        {/* BACK */}
+        {/* =================================================
+            BACK TO PRODUCTS
+        ================================================= */}
 
-        <Link
-          to="/customer-view"
+        <button
+          type="button"
           className="product-details-back-link"
+          onClick={
+            handleBackToProducts
+          }
         >
-          ⬅ Back to Customer View
-        </Link>
+          ⬅ Back to Products
+        </button>
 
       </div>
+
     </div>
   );
 }
